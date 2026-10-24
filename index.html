@@ -1,190 +1,163 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Online Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>YNH Smart Life Store</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 12px;
-      background-color: var(--tg-theme-bg-color, #f4f5f7);
-      color: var(--tg-theme-text-color, #222);
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #f4f5f7);
+      --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+      --text-color: var(--tg-theme-text-color, #1a1a1a);
+      --subtext-color: var(--tg-theme-hint-color, #707579);
+      --primary: var(--tg-theme-button-color, #0088cc);
+      --primary-text: var(--tg-theme-button-text-color, #ffffff);
     }
-    .product-card {
-      background: var(--tg-theme-secondary-bg-color, #fff);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    }
-    .product-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
-    .product-price { color: #2ecc71; font-weight: bold; margin-bottom: 8px; }
-    .options-row { margin: 8px 0; }
-    select {
-      width: 100%;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      background: #fff;
-    }
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .qty-btn {
-      width: 32px;
-      height: 32px;
-      background: #007aff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .order-summary {
-      background: #fff;
-      padding: 14px;
-      border-radius: 12px;
-      margin-top: 18px;
-      border: 1px dashed #007aff;
-    }
-    .total-price {
-      font-size: 18px;
-      font-weight: bold;
-      color: #e74c3c;
-      margin-top: 10px;
-    }
-    .btn-submit {
-      width: 100%;
-      background: #28a745;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      margin-top: 12px;
-      cursor: pointer;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); padding: 12px 12px 90px; }
+    header { text-align: center; margin-bottom: 16px; padding-top: 4px; }
+    h1 { font-size: 19px; font-weight: 700; }
+    .store-sub { font-size: 13px; color: var(--subtext-color); margin-top: 2px; }
+    
+    #loading { text-align: center; padding: 40px; font-size: 14px; color: var(--subtext-color); }
+    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .card img { width: 100%; height: 135px; object-fit: cover; background-color: #eee; }
+    .card-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; }
+    .title { font-size: 13px; font-weight: 600; line-height: 1.3; min-height: 34px; margin-bottom: 6px; }
+    .price { font-size: 14px; font-weight: 700; color: #0582ca; margin-bottom: 8px; }
+    
+    .color-select { width: 100%; padding: 5px; border-radius: 6px; border: 1px solid #ddd; font-size: 12px; margin-bottom: 8px; outline: none; background: #fff; }
+    
+    .qty-controls { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+    .qty-btn { width: 32px; height: 32px; border: none; border-radius: 8px; background: #eef2f5; font-size: 16px; font-weight: bold; cursor: pointer; color: #333; }
+    .qty-count { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; }
+
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); padding: 12px 16px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; z-index: 100; }
+    .total-price { font-size: 16px; font-weight: 700; color: #0582ca; }
+    .total-label { font-size: 12px; color: var(--subtext-color); }
+    .order-btn { background: var(--primary); color: var(--primary-text); border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .order-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
+  <header>
+    <h1>🛍 YNH Smart Life Store</h1>
+    <div class="store-sub">နေ့စဉ်ဘဝကို ပိုမိုလွယ်ကူစေမယ့် Smart Accessories များ</div>
+  </header>
 
-  <h3>🛍 ကုန်ပစ္စည်းများ</h3>
+  <div id="loading">ကုန်ပစ္စည်းများ တင်ယူနေပါသည်...</div>
+  <div class="product-grid" id="productGrid" style="display: none;"></div>
 
-  <!-- ပစ္စည်း ၁ -->
-  <div class="product-card" data-id="p1" data-name="USB Cable Fast Charging" data-price="4500">
-    <div class="product-title">USB Cable (Fast Charging)</div>
-    <div class="product-price">၄,၅၀၀ ကျပ်</div>
-    
-    <div class="options-row">
-      <label>အရောင်ရွေးပါ - </label>
-      <select class="item-color">
-        <option value="Black">အနက် (Black)</option>
-        <option value="White">အဖြူ (White)</option>
-        <option value="Red">အနီ (Red)</option>
-      </select>
+  <div class="bottom-bar">
+    <div>
+      <div class="total-label">စုစုပေါင်း ကျသင့်ငွေ</div>
+      <div class="total-price" id="totalDisplay">0 ကျပ်</div>
     </div>
-
-    <div class="qty-controls">
-      <button class="qty-btn" onclick="updateQty('p1', -1)">-</button>
-      <span id="qty-p1" style="font-weight: bold;">0</span>
-      <button class="qty-btn" onclick="updateQty('p1', 1)">+</button>
-    </div>
-  </div>
-
-  <!-- ပစ္စည်း ၂ -->
-  <div class="product-card" data-id="p2" data-name="OTG Adapter Type-C" data-price="3000">
-    <div class="product-title">OTG Adapter (Type-C)</div>
-    <div class="product-price">၃,၀၀၀ ကျပ်</div>
-    
-    <div class="options-row">
-      <label>အရောင်ရွေးပါ - </label>
-      <select class="item-color">
-        <option value="Black">အနက် (Black)</option>
-        <option value="Silver">ငွေရောင် (Silver)</option>
-      </select>
-    </div>
-
-    <div class="qty-controls">
-      <button class="qty-btn" onclick="updateQty('p2', -1)">-</button>
-      <span id="qty-p2" style="font-weight: bold;">0</span>
-      <button class="qty-btn" onclick="updateQty('p2', 1)">+</button>
-    </div>
-  </div>
-
-  <!-- Order စာရင်း -->
-  <div class="order-summary" id="cartSection" style="display: none;">
-    <h4>📋 သင်ရွေးချယ်ထားသော စာရင်း</h4>
-    <div id="cartItems"></div>
-    <div class="total-price">စုစုပေါင်း ကျသင့်ငွေ: <span id="totalAmount">0</span> ကျပ်</div>
-    <button class="btn-submit" onclick="submitOrder()">Order တင်မည်</button>
+    <button class="order-btn" id="orderBtn" disabled onclick="submitOrder()">Order တင်မည် (0)</button>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
     tg.expand();
 
-    const cart = {};
+    // Apps Script မှ ထုတ်ပေးသော Web App Deploy URL ဖြစ်ပါသည်
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTWhcFgAj0cc3ENB3g7t4r5E8g48g7449k8e9UVEON87ZEcktl45TlpSCjfB81riA0/exec";
 
-    function updateQty(productId, change) {
-      const card = document.querySelector(`[data-id="${productId}"]`);
-      const name = card.dataset.name;
-      const price = parseInt(card.dataset.price);
-      const color = card.querySelector('.item-color').value;
-      const key = `${productId}_${color}`;
+    let products = [];
+    let cart = {};
 
-      if (!cart[key]) {
-        cart[key] = { id: productId, name: name, color: color, price: price, qty: 0 };
+    async function loadProducts() {
+      try {
+        const response = await fetch(API_URL);
+        products = await response.json();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('productGrid').style.display = 'grid';
+        renderProducts();
+      } catch (e) {
+        document.getElementById('loading').innerText = "ပစ္စည်းများ ဖတ်မရဖြစ်နေပါသည်။ အင်တာနက်လိုင်း ပြန်စစ်ပေးပါ။";
       }
-
-      cart[key].qty += change;
-      if (cart[key].qty < 0) cart[key].qty = 0;
-
-      document.getElementById(`qty-${productId}`).innerText = cart[key].qty;
-      renderCart();
     }
 
-    function renderCart() {
-      const container = document.getElementById('cartItems');
-      const cartSection = document.getElementById('cartSection');
-      container.innerHTML = '';
+    function renderProducts() {
+      const container = document.getElementById('productGrid');
+      container.innerHTML = "";
+
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "card";
+
+        let colorOptions = p.colors.map(c => `<option value="${c}">${c}</option>`).join('');
+
+        card.innerHTML = `
+          <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&q=80'">
+          <div class="card-content">
+            <div class="title">${p.name}</div>
+            <div class="price">${p.price.toLocaleString()} ကျပ်</div>
+            <select class="color-select" id="color_${p.id}">
+              ${colorOptions}
+            </select>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="updateQty('${p.id}', -1)">-</button>
+              <span class="qty-count" id="qty_${p.id}">0</span>
+              <button class="qty-btn" onclick="updateQty('${p.id}', 1)">+</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateQty(id, change) {
+      if (!cart[id]) cart[id] = 0;
+      cart[id] = Math.max(0, cart[id] + change);
+      document.getElementById(`qty_${id}`).innerText = cart[id];
+      updateTotals();
+    }
+
+    function updateTotals() {
       let total = 0;
-      let hasItems = false;
+      let totalCount = 0;
 
-      for (const k in cart) {
-        if (cart[k].qty > 0) {
-          hasItems = true;
-          const subtotal = cart[k].qty * cart[k].price;
-          total += subtotal;
-
-          const itemRow = document.createElement('div');
-          itemRow.style.padding = '6px 0';
-          itemRow.innerHTML = `• ${cart[k].name} (${cart[k].color}) x <b>${cart[k].qty}</b> = ${subtotal.toLocaleString()} ကျပ်`;
-          container.appendChild(itemRow);
+      products.forEach(p => {
+        const count = cart[p.id] || 0;
+        if (count > 0) {
+          total += count * p.price;
+          totalCount += count;
         }
-      }
+      });
 
-      document.getElementById('totalAmount').innerText = total.toLocaleString();
-      cartSection.style.display = hasItems ? 'block' : 'none';
+      document.getElementById('totalDisplay').innerText = total.toLocaleString() + " ကျပ်";
+      const orderBtn = document.getElementById('orderBtn');
+      orderBtn.innerText = `Order တင်မည် (${totalCount})`;
+      orderBtn.disabled = totalCount === 0;
     }
 
     function submitOrder() {
-      const activeItems = Object.values(cart).filter(i => i.qty > 0);
-      if (activeItems.length === 0) {
-        tg.showAlert("ကျေးဇူးပြု၍ ပစ္စည်း အရင်ရွေးချယ်ပေးပါခင်ဗျာ။");
-        return;
+      const orderItems = [];
+
+      products.forEach(p => {
+        const qty = cart[p.id] || 0;
+        if (qty > 0) {
+          const color = document.getElementById(`color_${p.id}`).value;
+          orderItems.push({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            qty: qty,
+            color: color
+          });
+        }
+      });
+
+      if (orderItems.length > 0) {
+        tg.sendData(JSON.stringify(orderItems));
+        tg.close();
       }
-      
-      tg.sendData(JSON.stringify(activeItems));
-      tg.close();
     }
+
+    loadProducts();
   </script>
 </body>
 </html>
