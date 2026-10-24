@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Online Shop</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 12px;
+      background-color: var(--tg-theme-bg-color, #f4f5f7);
+      color: var(--tg-theme-text-color, #222);
+    }
+    .product-card {
+      background: var(--tg-theme-secondary-bg-color, #fff);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .product-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+    .product-price { color: #2ecc71; font-weight: bold; margin-bottom: 8px; }
+    .options-row { margin: 8px 0; }
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #fff;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .qty-btn {
+      width: 32px;
+      height: 32px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .order-summary {
+      background: #fff;
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: 18px;
+      border: 1px dashed #007aff;
+    }
+    .total-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #e74c3c;
+      margin-top: 10px;
+    }
+    .btn-submit {
+      width: 100%;
+      background: #28a745;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h3>🛍 ကုန်ပစ္စည်းများ</h3>
+
+  <!-- ပစ္စည်း ၁ -->
+  <div class="product-card" data-id="p1" data-name="USB Cable Fast Charging" data-price="4500">
+    <div class="product-title">USB Cable (Fast Charging)</div>
+    <div class="product-price">၄,၅၀၀ ကျပ်</div>
+    
+    <div class="options-row">
+      <label>အရောင်ရွေးပါ - </label>
+      <select class="item-color">
+        <option value="Black">အနက် (Black)</option>
+        <option value="White">အဖြူ (White)</option>
+        <option value="Red">အနီ (Red)</option>
+      </select>
+    </div>
+
+    <div class="qty-controls">
+      <button class="qty-btn" onclick="updateQty('p1', -1)">-</button>
+      <span id="qty-p1" style="font-weight: bold;">0</span>
+      <button class="qty-btn" onclick="updateQty('p1', 1)">+</button>
+    </div>
+  </div>
+
+  <!-- ပစ္စည်း ၂ -->
+  <div class="product-card" data-id="p2" data-name="OTG Adapter Type-C" data-price="3000">
+    <div class="product-title">OTG Adapter (Type-C)</div>
+    <div class="product-price">၃,၀၀၀ ကျပ်</div>
+    
+    <div class="options-row">
+      <label>အရောင်ရွေးပါ - </label>
+      <select class="item-color">
+        <option value="Black">အနက် (Black)</option>
+        <option value="Silver">ငွေရောင် (Silver)</option>
+      </select>
+    </div>
+
+    <div class="qty-controls">
+      <button class="qty-btn" onclick="updateQty('p2', -1)">-</button>
+      <span id="qty-p2" style="font-weight: bold;">0</span>
+      <button class="qty-btn" onclick="updateQty('p2', 1)">+</button>
+    </div>
+  </div>
+
+  <!-- Order စာရင်း -->
+  <div class="order-summary" id="cartSection" style="display: none;">
+    <h4>📋 သင်ရွေးချယ်ထားသော စာရင်း</h4>
+    <div id="cartItems"></div>
+    <div class="total-price">စုစုပေါင်း ကျသင့်ငွေ: <span id="totalAmount">0</span> ကျပ်</div>
+    <button class="btn-submit" onclick="submitOrder()">Order တင်မည်</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const cart = {};
+
+    function updateQty(productId, change) {
+      const card = document.querySelector(`[data-id="${productId}"]`);
+      const name = card.dataset.name;
+      const price = parseInt(card.dataset.price);
+      const color = card.querySelector('.item-color').value;
+      const key = `${productId}_${color}`;
+
+      if (!cart[key]) {
+        cart[key] = { id: productId, name: name, color: color, price: price, qty: 0 };
+      }
+
+      cart[key].qty += change;
+      if (cart[key].qty < 0) cart[key].qty = 0;
+
+      document.getElementById(`qty-${productId}`).innerText = cart[key].qty;
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItems');
+      const cartSection = document.getElementById('cartSection');
+      container.innerHTML = '';
+      let total = 0;
+      let hasItems = false;
+
+      for (const k in cart) {
+        if (cart[k].qty > 0) {
+          hasItems = true;
+          const subtotal = cart[k].qty * cart[k].price;
+          total += subtotal;
+
+          const itemRow = document.createElement('div');
+          itemRow.style.padding = '6px 0';
+          itemRow.innerHTML = `• ${cart[k].name} (${cart[k].color}) x <b>${cart[k].qty}</b> = ${subtotal.toLocaleString()} ကျပ်`;
+          container.appendChild(itemRow);
+        }
+      }
+
+      document.getElementById('totalAmount').innerText = total.toLocaleString();
+      cartSection.style.display = hasItems ? 'block' : 'none';
+    }
+
+    function submitOrder() {
+      const activeItems = Object.values(cart).filter(i => i.qty > 0);
+      if (activeItems.length === 0) {
+        tg.showAlert("ကျေးဇူးပြု၍ ပစ္စည်း အရင်ရွေးချယ်ပေးပါခင်ဗျာ။");
+        return;
+      }
+      
+      tg.sendData(JSON.stringify(activeItems));
+      tg.close();
+    }
+  </script>
+</body>
+</html>
