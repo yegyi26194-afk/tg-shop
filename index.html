@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>YNH Smart Life Store</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -40,28 +40,36 @@
     .order-btn { background: var(--primary); color: var(--primary-text); border: none; padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
     .order-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    /* Modal Styling */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-    .modal-content { background: var(--card-bg); width: 100%; max-height: 88vh; border-radius: 16px 16px 0 0; padding: 16px; display: flex; flex-direction: column; animation: slideUp 0.25s ease-out; }
+    /* Modal Styling - Full Height Bottom Sheet */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
+    .modal-content { background: var(--card-bg); width: 100%; height: 92vh; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; animation: slideUp 0.25s ease-out; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+    
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .modal-title { font-size: 16px; font-weight: 700; }
-    .close-btn { background: none; border: none; font-size: 20px; color: var(--subtext-color); cursor: pointer; }
-    .modal-items { overflow-y: auto; flex-grow: 1; margin-bottom: 10px; max-height: 28vh; }
-    .modal-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .modal-item-info { flex-grow: 1; padding-right: 10px; }
-    .modal-item-name { font-size: 13px; font-weight: 600; }
-    .modal-item-meta { font-size: 12px; color: var(--subtext-color); margin-top: 2px; }
-    .modal-item-meta span { color: #2ea6ff; font-weight: 600; }
+    .close-btn { background: none; border: none; font-size: 22px; color: var(--subtext-color); cursor: pointer; padding: 0 4px; }
+    
+    .modal-body { overflow-y: auto; flex: 1; padding: 14px 16px 20px; -webkit-overflow-scrolling: touch; }
+    .section-title { font-size: 13px; font-weight: 600; color: #2ea6ff; margin-bottom: 10px; }
 
-    .customer-form { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
-    .form-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #2ea6ff; }
-    .form-input { width: 100%; padding: 8px 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #3c4b5d; background: #1c2733; color: #fff; font-size: 13px; outline: none; }
+    /* Item Card inside Modal */
+    .modal-item-row { background: #1c2733; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); }
+    .modal-item-info { flex: 1; padding-right: 12px; }
+    .modal-item-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+    .modal-item-meta { font-size: 12px; color: var(--subtext-color); margin-top: 4px; }
+    .modal-item-price { color: #2ea6ff; font-weight: 700; font-size: 13px; margin-top: 2px; }
+
+    /* Customer Form */
+    .customer-form { background: #1c2733; padding: 14px; border-radius: 10px; margin-top: 14px; border: 1px solid rgba(255,255,255,0.05); }
+    .form-group { margin-bottom: 10px; }
+    .form-label { display: block; font-size: 12px; color: var(--subtext-color); margin-bottom: 4px; }
+    .form-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #3c4b5d; background: #232e3c; color: #fff; font-size: 13px; outline: none; }
     .form-input:focus { border-color: #2ea6ff; }
 
-    .modal-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+    /* Fixed Sticky Footer inside Modal */
+    .modal-footer { padding: 12px 16px; background: #1a232e; border-top: 1px solid rgba(255,255,255,0.1); box-shadow: 0 -4px 10px rgba(0,0,0,0.2); }
     .modal-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
-    .confirm-btn { width: 100%; background: var(--primary); color: var(--primary-text); border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .confirm-btn { width: 100%; background: var(--primary); color: var(--primary-text); border: none; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -85,19 +93,32 @@
   <div class="modal-overlay" id="cartModal">
     <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title">📋 ရွေးချယ်ထားသော ပစ္စည်းများ</div>
+        <div class="modal-title">📋 မှာယူမှု အတည်ပြုခြင်း</div>
         <button class="close-btn" onclick="closeCartModal()">✕</button>
       </div>
 
-      <div class="modal-items" id="modalItems"></div>
+      <div class="modal-body">
+        <div class="section-title">ရွေးချယ်ထားသော ပစ္စည်းများ (အရေအတွက် ပြင်နိုင်ပါသည်)</div>
+        <div id="modalItems"></div>
 
-      <div class="customer-form">
-        <div class="form-title">🚚 ပို့ဆောင်ရမည့် လိပ်စာ အချက်အလက်များ</div>
-        <input type="text" id="custName" class="form-input" placeholder="အမည် ရေးပါ *" />
-        <input type="tel" id="custPhone" class="form-input" placeholder="ဖုန်းနံပါတ် ရေးပါ *" />
-        <input type="text" id="custAddress" class="form-input" style="margin-bottom: 0;" placeholder="မြို့နယ် နှင့် လိပ်စာ အပြည့်အစုံ *" />
+        <div class="customer-form">
+          <div class="section-title" style="margin-bottom: 8px;">🚚 ပို့ဆောင်ရမည့် လိပ်စာ အချက်အလက်များ</div>
+          <div class="form-group">
+            <label class="form-label">အမည်</label>
+            <input type="text" id="custName" class="form-input" placeholder="အမည် ရေးပါ *" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">ဖုန်းနံပါတ်</label>
+            <input type="tel" id="custPhone" class="form-input" placeholder="09xxxxxxxxx *" />
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">လိပ်စာ အပြည့်အစုံ</label>
+            <textarea id="custAddress" class="form-input" rows="2" style="resize: none;" placeholder="အိမ်အမှတ်၊ လမ်း၊ ရပ်ကွက်၊ မြို့နယ် *"></textarea>
+          </div>
+        </div>
       </div>
 
+      <!-- အောက်ခြေတွင် အမြဲပေါ်နေမည့် Fixed Footer -->
       <div class="modal-footer">
         <div class="modal-total-row">
           <span>စုစုပေါင်း ကျသင့်ငွေ</span>
@@ -263,7 +284,7 @@
       const keys = Object.keys(cart).filter(k => cart[k] > 0);
 
       if (keys.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--subtext-color); padding: 20px;">ပစ္စည်း မရွေးရသေးပါ</div>`;
+        container.innerHTML = `<div style="text-align: center; color: var(--subtext-color); padding: 25px 10px;">ပစ္စည်း မရွေးရသေးပါ</div>`;
         document.getElementById('confirmOrderBtn').disabled = true;
         return;
       }
@@ -281,12 +302,13 @@
         row.innerHTML = `
           <div class="modal-item-info">
             <div class="modal-item-name">${prod.name}</div>
-            <div class="modal-item-meta">Color: <b>${color}</b> | <span>${(Number(prod.price) * qty).toLocaleString()} ကျပ်</span></div>
+            <div class="modal-item-meta">Color: <b>${color}</b></div>
+            <div class="modal-item-price">${(Number(prod.price) * qty).toLocaleString()} ကျပ်</div>
           </div>
           <div class="qty-controls" style="gap: 8px;">
-            <button class="qty-btn" style="width:28px; height:28px;" onclick="updateModalQty('${key}', -1)">-</button>
+            <button class="qty-btn" style="width:30px; height:30px;" onclick="updateModalQty('${key}', -1)">-</button>
             <span class="qty-count">${qty}</span>
-            <button class="qty-btn" style="width:28px; height:28px;" onclick="updateModalQty('${key}', 1)">+</button>
+            <button class="qty-btn" style="width:30px; height:30px;" onclick="updateModalQty('${key}', 1)">+</button>
           </div>
         `;
         container.appendChild(row);
