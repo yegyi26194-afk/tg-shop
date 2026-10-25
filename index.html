@@ -42,19 +42,26 @@
 
     /* Order Review Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-    .modal-content { background: var(--card-bg); width: 100%; max-height: 80vh; border-radius: 16px 16px 0 0; padding: 16px; display: flex; flex-direction: column; animation: slideUp 0.25s ease-out; }
+    .modal-content { background: var(--card-bg); width: 100%; max-height: 88vh; border-radius: 16px 16px 0 0; padding: 16px; display: flex; flex-direction: column; animation: slideUp 0.25s ease-out; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
     .modal-title { font-size: 16px; font-weight: 700; }
     .close-btn { background: none; border: none; font-size: 20px; color: var(--subtext-color); cursor: pointer; }
-    .modal-items { overflow-y: auto; flex-grow: 1; margin-bottom: 14px; }
-    .modal-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .modal-items { overflow-y: auto; flex-grow: 1; margin-bottom: 10px; max-height: 28vh; }
+    .modal-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .modal-item-info { flex-grow: 1; padding-right: 10px; }
     .modal-item-name { font-size: 13px; font-weight: 600; }
     .modal-item-meta { font-size: 12px; color: var(--subtext-color); margin-top: 2px; }
     .modal-item-meta span { color: #2ea6ff; font-weight: 600; }
-    .modal-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; }
-    .modal-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 15px; font-weight: 700; }
+
+    /* Customer Information Form */
+    .customer-form { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
+    .form-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #2ea6ff; }
+    .form-input { width: 100%; padding: 8px 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #3c4b5d; background: #1c2733; color: #fff; font-size: 13px; outline: none; }
+    .form-input:focus { border-color: #2ea6ff; }
+
+    .modal-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+    .modal-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .confirm-btn { width: 100%; background: var(--primary); color: var(--primary-text); border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
@@ -82,7 +89,17 @@
         <div class="modal-title">📋 ရွေးချယ်ထားသော ပစ္စည်းများ</div>
         <button class="close-btn" onclick="closeCartModal()">✕</button>
       </div>
+
       <div class="modal-items" id="modalItems"></div>
+
+      <!-- ပို့ဆောင်ရမည့် အချက်အလက်ဖြည့်ရန် Form -->
+      <div class="customer-form">
+        <div class="form-title">🚚 ပို့ဆောင်ရမည့် လိပ်စာ အချက်အလက်များ</div>
+        <input type="text" id="custName" class="form-input" placeholder="အမည် ရေးပါ *" />
+        <input type="tel" id="custPhone" class="form-input" placeholder="ဖုန်းနံပါတ် ရေးပါ *" />
+        <input type="text" id="custAddress" class="form-input" style="margin-bottom: 0;" placeholder="မြို့နယ် နှင့် လိပ်စာ အပြည့်အစုံ *" />
+      </div>
+
       <div class="modal-footer">
         <div class="modal-total-row">
           <span>စုစုပေါင်း ကျသင့်ငွေ</span>
@@ -113,7 +130,6 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxTWhcFgAj0cc3ENB3g7t4r5E8g48g7449k8e9UVEON87ZEcktl45TlpSCjfB81riA0/exec";
 
     let products = initialProducts;
-    // Cart structure: { "id___color": quantity }
     let cart = {};
 
     async function fetchLatestProducts() {
@@ -228,9 +244,12 @@
       if (modalTotal) modalTotal.innerText = totalAmount.toLocaleString() + " ကျပ်";
     }
 
-    // Modal Control & Live Edit in Modal
     function openCartModal() {
       renderModalItems();
+      const user = tg?.initDataUnsafe?.user;
+      if (user && !document.getElementById('custName').value) {
+        document.getElementById('custName').value = [user.first_name, user.last_name].filter(Boolean).join(" ");
+      }
       document.getElementById('cartModal').style.display = 'flex';
     }
 
@@ -295,9 +314,17 @@
       }
     }
 
-    function submitFinalOrder() {
-      const orderItems = [];
+    async function submitFinalOrder() {
+      const name = document.getElementById('custName').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
 
+      if (!name || !phone || !address) {
+        alert("ကျေးဇူးပြု၍ အမည်၊ ဖုန်းနံပါတ် နှင့် လိပ်စာ အပြည့်အစုံ ဖြည့်ပေးပါခင်ဗျာ။");
+        return;
+      }
+
+      const orderItems = [];
       for (const [key, qty] of Object.entries(cart)) {
         if (qty > 0) {
           const [id, color] = key.split("___");
@@ -314,9 +341,43 @@
         }
       }
 
-      if (orderItems.length > 0 && tg) {
-        tg.sendData(JSON.stringify(orderItems));
-        tg.close();
+      if (orderItems.length === 0) return;
+
+      const confirmBtn = document.getElementById('confirmOrderBtn');
+      confirmBtn.innerText = "Order ပို့ဆောင်နေပါသည်...";
+      confirmBtn.disabled = true;
+
+      const user = tg?.initDataUnsafe?.user || {};
+      const chatId = user.id || "";
+
+      const orderPayload = {
+        action: "submit_order",
+        chatId: chatId,
+        user: user,
+        customerDetails: {
+          name: name,
+          phone: phone,
+          address: address
+        },
+        items: orderItems
+      };
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload)
+        });
+
+        alert("🎉 Order တင်ခြင်း အောင်မြင်ပါသည်ခင်ဗျာ!");
+        if (tg) tg.close();
+      } catch (err) {
+        console.error("Fetch error:", err);
+        if (tg) {
+          tg.sendData(JSON.stringify(orderPayload));
+          tg.close();
+        }
       }
     }
 
