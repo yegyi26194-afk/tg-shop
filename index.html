@@ -150,7 +150,7 @@
       { id: "007", name: "65W Fast Charging Keychain Cable with LED Display", price: 38000, colors: ["Grey", "Purple", "Blue", "Green"], image: "https://lh3.googleusercontent.com/d/18YTtcXq_ubqWKEdw8Lm1Bo84agQpSpn" }
     ];
 
-    // Web App URL အသစ်
+    // သင်၏ တရားဝင် Web App URL
     const API_URL = "https://script.google.com/macros/s/AKfycbyba5ahRj4bqSa5OcHLD9nvguqQiTX4m50b7zNJwVJSNd9lnqhhCgApoCSQW7pZ1N-q/exec";
 
     let products = initialProducts;
@@ -386,13 +386,14 @@
       };
 
       try {
+        // Data မပျောက်စေရန် အသေချာဆုံး URLSearchParams POST စနစ်
+        const params = new URLSearchParams();
+        params.append("orderData", JSON.stringify(orderPayload));
+
         await fetch(API_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
-          body: "orderData=" + encodeURIComponent(JSON.stringify(orderPayload))
+          body: params
         });
 
         alert("🎉 Order တင်ခြင်း အောင်မြင်ပါသည်ခင်ဗျာ!");
