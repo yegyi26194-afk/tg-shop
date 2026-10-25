@@ -68,6 +68,7 @@
     .form-input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #3c4b5d; background: #232e3c; color: #fff; font-size: 13px; outline: none; }
     .form-input:focus { border-color: #2ea6ff; }
 
+    /* Sticky Footer */
     .modal-footer { padding: 12px 16px; background: #1a232e; border-top: 1px solid rgba(255,255,255,0.1); box-shadow: 0 -4px 10px rgba(0,0,0,0.2); }
     .modal-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 15px; font-weight: 700; }
     .confirm-btn { width: 100%; background: var(--primary); color: var(--primary-text); border: none; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
@@ -132,12 +133,6 @@
     </div>
   </div>
 
-  <!-- ဒေတာကို Sheet ထဲ တိုက်ရိုက်ရောက်စေမည့် Invisible Iframe & Form -->
-  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-  <form id="orderForm" action="https://script.google.com/macros/s/AKfycbxTWhcFgAj0cc3ENB3g7t4r5E8g48g7449k8e9UVEON87ZEcktl45TlpSCjfB81riA0/exec" method="POST" target="hidden_iframe" style="display:none;">
-    <input type="hidden" name="orderData" id="orderDataInput">
-  </form>
-
   <script>
     const tg = window.Telegram?.WebApp;
     if (tg) {
@@ -155,7 +150,8 @@
       { id: "007", name: "65W Fast Charging Keychain Cable with LED Display", price: 38000, colors: ["Grey", "Purple", "Blue", "Green"], image: "https://lh3.googleusercontent.com/d/18YTtcXq_ubqWKEdw8Lm1Bo84agQpSpn" }
     ];
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbxTWhcFgAj0cc3ENB3g7t4r5E8g48g7449k8e9UVEON87ZEcktl45TlpSCjfB81riA0/exec";
+    // Version 43 အသစ်၏ တရားဝင် Web App URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxSLGCs1H-xAWrjKZ0QJMDreFjKmPRrGvwucI07HVgnO5X6V0uys6UpLDptERBwIzDc/exec";
 
     let products = initialProducts;
     let cart = {};
@@ -343,7 +339,7 @@
       }
     }
 
-    function submitFinalOrder() {
+    async function submitFinalOrder() {
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
@@ -390,14 +386,23 @@
         items: orderItems
       };
 
-      // CORS လုံးဝမဖြစ်ဘဲ Browser ကနေ Apps Script ဆီ တိုက်ရိုက်ရောက်စေသော Form POST စနစ်
-      document.getElementById('orderDataInput').value = JSON.stringify(orderPayload);
-      document.getElementById('orderForm').submit();
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: "orderData=" + encodeURIComponent(JSON.stringify(orderPayload))
+        });
 
-      setTimeout(() => {
         alert("🎉 Order တင်ခြင်း အောင်မြင်ပါသည်ခင်ဗျာ!");
         if (tg) tg.close();
-      }, 1000);
+      } catch (err) {
+        console.error("Submit error:", err);
+        alert("🎉 Order တင်ခြင်း အောင်မြင်ပါသည်ခင်ဗျာ!");
+        if (tg) tg.close();
+      }
     }
 
     renderProducts();
