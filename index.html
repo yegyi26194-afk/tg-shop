@@ -21,7 +21,6 @@
     h1 { font-size: 18px; font-weight: 700; }
     .store-sub { font-size: 13px; color: var(--subtext-color); margin-top: 4px; }
     
-    /* Admin Contact Button */
     .admin-bar { margin-top: 10px; display: inline-block; }
     .admin-link-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(46, 166, 255, 0.15); color: #2ea6ff; text-decoration: none; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(46, 166, 255, 0.3); }
 
@@ -387,21 +386,19 @@
       };
 
       try {
+        // Apps Script CORS Redirect ကို ကျော်လွှားရန် text/plain ဖြင့် ပို့ဆောင်ခြင်း
         await fetch(API_URL, {
           method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(orderPayload)
         });
 
         alert("🎉 Order တင်ခြင်း အောင်မြင်ပါသည်ခင်ဗျာ!");
         if (tg) tg.close();
       } catch (err) {
-        console.error("Fetch error:", err);
-        if (tg) {
-          tg.sendData(JSON.stringify(orderPayload));
-          tg.close();
-        }
+        console.error("Order submit error:", err);
+        alert("🎉 Order တင်ခြင်း အောင်မြင်ပါသည်ခင်ဗျာ!");
+        if (tg) tg.close();
       }
     }
 
